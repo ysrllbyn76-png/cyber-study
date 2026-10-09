@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cyber Study</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cyber Study">
+<meta name="theme-color" content="#0f1117">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#0f1117;--surface:#181b23;--card:#1e2230;--input:#252937;
+  --fg:#e2e4ea;--dim:#8b8fa3;--faint:#5f6478;
+  --accent:#3ecfb4;--accent-a:rgba(62,207,180,.12);--accent-glow:rgba(62,207,180,.3);
+  --warn:#f0a050;--warn-a:rgba(240,160,80,.12);
+  --blue:#7da0ff;--blue-a:rgba(100,140,255,.12);
+  --violet:#b08cff;--violet-a:rgba(180,120,255,.12);
+  --danger:#e85555;--danger-a:rgba(232,85,85,.12);
+  --code-bg:#141720;--border:#2a2e3c;--scrim:rgba(0,0,0,.55);
+  --r:14px;--rs:8px;
+  --body:'IBM Plex Sans',-apple-system,'Helvetica Neue',sans-serif;
+  --mono:'IBM Plex Mono',Menlo,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --bg:#f4f5f7;--surface:#fff;--card:#fff;--input:#eceef2;--fg:#1a1d28;--dim:#5f6477;--faint:#8a8fa2;
+  --accent:#138a74;--accent-a:rgba(19,138,116,.1);--accent-glow:rgba(19,138,116,.25);
+  --warn:#b86a12;--blue:#3a5fd0;--violet:#7a4fd0;--danger:#c93a3a;
+  --code-bg:#f0f1f4;--border:#dde0e7;--scrim:rgba(20,22,30,.4);color-scheme:light;
+}}
+:root[data-theme="light"]{
+  --bg:#f4f5f7;--surface:#fff;--card:#fff;--input:#eceef2;--fg:#1a1d28;--dim:#5f6477;--faint:#8a8fa2;
+  --accent:#138a74;--accent-a:rgba(19,138,116,.1);--accent-glow:rgba(19,138,116,.25);
+  --warn:#b86a12;--blue:#3a5fd0;--violet:#7a4fd0;--danger:#c93a3a;
+  --code-bg:#f0f1f4;--border:#dde0e7;--scrim:rgba(20,22,30,.4);color-scheme:light;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;
+  -webkit-tap-highlight-color:transparent;overflow:hidden;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font-family:inherit;color:inherit}
+button{cursor:pointer}
+img{max-width:100%;display:block}
+
+#app{display:flex;flex-direction:column;height:100%;max-width:560px;margin:0 auto}
+
+.top{display:flex;align-items:center;gap:10px;padding:12px 16px;
+  padding-top:calc(12px + env(safe-area-inset-top,0px));
+  background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0}
+.top h1{font-size:20px;font-weight:700;color:var(--accent);flex:1;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top h1 em{color:var(--fg);font-style:normal}
+.ib{width:40px;height:40px;border-radius:50%;border:none;background:var(--card);color:var(--dim);
+  font-size:17px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ib:active{background:var(--accent-a);color:var(--accent)}
+.back{background:none;color:var(--accent);font-size:24px}
+
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
+  padding:16px;padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+
+.sh{font-size:13px;font-weight:600;letter-spacing:.4px;color:var(--faint);margin:22px 0 10px}
+.sh:first-child{margin-top:0}
+
+.folders{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.folder{background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:12px;display:flex;flex-direction:column;gap:8px;overflow:hidden;text-align:left;min-width:0}
+.folder:active{border-color:var(--accent)}
+.folder-img,.folder-ph{width:100%;aspect-ratio:16/10;border-radius:var(--rs);background:var(--input);object-fit:cover}
+.folder-ph{display:flex;align-items:center;justify-content:center;font-size:30px;color:var(--faint)}
+.folder-name{font-size:14px;font-weight:600;line-height:1.3;word-break:break-word}
+.folder-count{font-size:12px;color:var(--faint)}
+.folder-add{border-style:dashed;align-items:center;justify-content:center;text-align:center;min-height:130px;color:var(--faint)}
+.folder-add .plus{font-size:28px}
+
+.card{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:14px 16px}
+.card:active{border-color:var(--accent)}
+.card+.card{margin-top:8px}
+.card-title{font-size:15px;font-weight:600;margin-bottom:6px;line-height:1.4;word-break:break-word}
+.card-meta{font-size:12px;color:var(--faint);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+.b-inbox{background:var(--warn-a);color:var(--warn)}
+.b-learning{background:var(--blue-a);color:var(--blue)}
+.b-practice{background:var(--violet-a);color:var(--violet)}
+.b-done{background:var(--accent-a);color:var(--accent)}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:10px;text-align:center}
+.stat-n{font-size:22px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+.stat-l{font-size:11px;color:var(--faint);margin-top:2px}
+
+.topic-h{margin-bottom:8px}
+.topic-h .sub{font-size:13px;color:var(--accent);font-weight:500;margin-bottom:4px}
+.topic-h h2{font-size:22px;font-weight:700;line-height:1.3;word-break:break-word;text-wrap:balance}
+.note-text{font-size:16px;line-height:1.75;white-space:pre-wrap;word-break:break-word;-webkit-user-select:text;user-select:text}
+.note-text a{color:var(--accent)}
+.code-wrap{position:relative}
+.code-box{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--rs);
+  padding:14px;padding-top:36px;overflow-x:auto;direction:ltr;text-align:left;-webkit-user-select:text;user-select:text}
+.code-box code{font-family:var(--mono);font-size:13px;white-space:pre;line-height:1.55}
+.copy{position:absolute;top:6px;right:6px;font-size:12px;padding:4px 10px;border-radius:6px;
+  border:1px solid var(--border);background:var(--card);color:var(--dim)}
+.gallery{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gallery button{border:none;padding:0;background:var(--input);border-radius:var(--rs);overflow:hidden;aspect-ratio:1}
+.gallery img{width:100%;height:100%;object-fit:cover}
+
+.viewer{position:fixed;inset:0;background:#000;z-index:400;display:flex;align-items:center;justify-content:center;
+  padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.viewer img{max-width:100%;max-height:100%;object-fit:contain}
+.viewer .x{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:12px;width:40px;height:40px;border-radius:50%;
+  border:none;background:rgba(255,255,255,.15);color:#fff;font-size:18px}
+
+.fab{position:fixed;bottom:calc(22px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);
+  width:58px;height:58px;border-radius:50%;background:var(--accent);color:var(--bg);border:none;
+  font-size:30px;box-shadow:0 4px 20px var(--accent-glow);z-index:90;display:flex;align-items:center;justify-content:center}
+.fab:active{transform:translateX(-50%) scale(.92)}
+
+.overlay{position:fixed;inset:0;background:var(--scrim);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;bottom:0;left:0;right:0;z-index:201;background:var(--surface);
+  border-radius:20px 20px 0 0;max-width:560px;margin:0 auto;
+  transform:translateY(105%);transition:transform .3s cubic-bezier(.32,.72,0,1);
+  max-height:92dvh;display:flex;flex-direction:column}
+.sheet.open{transform:translateY(0)}
+.sheet-head{display:flex;align-items:center;gap:8px;padding:14px 16px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sheet-head h2{flex:1;font-size:17px;font-weight:700;text-align:center}
+.sheet-head .lnk{background:none;border:none;font-size:16px;padding:6px 4px;min-width:56px}
+.sheet-head .save{color:var(--accent);font-weight:700;text-align:right}
+.sheet-head .cancel{color:var(--dim);text-align:left}
+.sheet-body{overflow-y:auto;padding:16px;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch}
+
+.fg{margin-bottom:16px}
+.fl{display:block;font-size:13px;font-weight:600;color:var(--dim);margin-bottom:6px}
+.fl small{color:var(--faint);font-weight:400;font-size:12px}
+/* 16px minimum: iOS zooms the page into any smaller field */
+.fi{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:var(--rs);
+  background:var(--input);font-size:16px;outline:none;-webkit-appearance:none;appearance:none}
+.fi:focus{border-color:var(--accent)}
+textarea.fi{min-height:110px;resize:vertical;line-height:1.6}
+.fi.code{font-family:var(--mono);font-size:16px;direction:ltr;text-align:left;white-space:pre;overflow-x:auto}
+
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:var(--input);
+  color:var(--dim);font-size:14px;font-weight:500}
+.pill.on{border-color:var(--accent);background:var(--accent-a);color:var(--accent)}
+
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:var(--rs);font-size:16px;font-weight:600}
+.btn:active{opacity:.8}
+.btn-p{background:var(--accent);color:var(--bg)}
+.btn-s{background:var(--input);color:var(--fg)}
+.btn-d{background:var(--danger-a);color:var(--danger)}
+.row{display:flex;gap:8px}
+.row .btn{flex:1}
+
+.thumbs{display:flex;gap:10px;flex-wrap:wrap}
+.thumb{position:relative;width:68px;height:68px}
+.thumb img{width:100%;height:100%;object-fit:cover;border-radius:var(--rs);background:var(--input)}
+.thumb .rm{position:absolute;top:-7px;right:-7px;width:24px;height:24px;border-radius:50%;
+  background:var(--danger);color:#fff;border:2px solid var(--surface);font-size:12px;line-height:1;
+  display:flex;align-items:center;justify-content:center}
+.add-img{width:68px;height:68px;border-radius:var(--rs);border:2px dashed var(--border);background:none;
+  color:var(--faint);font-size:22px;display:flex;align-items:center;justify-content:center}
+.add-img:active{border-color:var(--accent);color:var(--accent)}
+
+.search{position:relative;margin-bottom:16px}
+.search input{padding-left:40px;border-radius:var(--r);background:var(--card)}
+.search .si{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--faint);pointer-events:none}
+
+.empty{text-align:center;padding:44px 20px;color:var(--faint)}
+.empty .ei{font-size:44px;margin-bottom:12px;opacity:.6}
+.empty p{font-size:14px;line-height:1.7}
+
+.note{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px;position:relative}
+.note h3{font-size:15px;font-weight:700;margin-bottom:8px;color:var(--accent)}
+.note p,.note ol{font-size:14px;line-height:1.75;color:var(--dim)}
+.note ol{padding-left:20px}
+.note .dismiss{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--faint);font-size:18px;padding:6px}
+
+
+.dialog{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--scrim)}
+.dialog-box{background:var(--surface);border-radius:var(--r);padding:20px;width:100%;max-width:340px;border:1px solid var(--border)}
+.dialog-box p{font-size:16px;line-height:1.6;margin-bottom:18px;white-space:pre-line}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));
+  z-index:600;background:var(--fg);color:var(--bg);font-size:14px;padding:10px 16px;border-radius:10px;
+  max-width:calc(100% - 32px);text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.toast.err{background:var(--danger);color:#fff}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <button class="ib back" id="backBtn" onclick="goBack()" aria-label="Back" hidden>&#8592;</button>
+    <h1 id="topTitle">Cyber <em>Study</em></h1>
+    <button class="ib" id="editBtn" onclick="onEditBtn()" aria-label="Edit" hidden>&#9998;</button>
+    <button class="ib" id="searchBtn" onclick="toggleSearch()" aria-label="Search">&#x1F50D;</button>
+  </header>
+
+  <main class="scroll" id="scroll">
+    <section id="vHome">
+      <div id="banners"></div>
+      <div id="searchArea" hidden>
+        <div class="search">
+          <input type="search" class="fi" id="searchInput" placeholder="Search topics, notes and code..." oninput="doSearch()" autocomplete="off">
+          <span class="si">&#x1F50D;</span>
+        </div>
+        <div id="searchResults"></div>
+      </div>
+      <div id="homeMain">
+        <div class="stats" id="stats"></div>
+        <div id="continueArea"></div>
+        <div class="sh">MY FOLDERS</div>
+        <div class="folders" id="foldersGrid"></div>
+      </div>
+    </section>
+    <section id="vFolder" hidden></section>
+    <section id="vTopic" hidden></section>
+  </main>
+
+  <button class="fab" id="fab" onclick="onFab()" aria-label="Add">+</button>
+</div>
+
+<!-- Folder sheet -->
+<div class="overlay" id="folderOv" onclick="cancelFolder()"></div>
+<div class="sheet" id="folderSh" role="dialog" aria-modal="true">
+  <div class="sheet-head">
+    <button class="lnk cancel" onclick="cancelFolder()">Cancel</button>
+    <h2 id="folderShTitle">New folder</h2>
+    <button class="lnk save" onclick="saveFolder()">Save</button>
+  </div>
+  <div class="sheet-body">
+    <div class="fg">
+      <label class="fl" for="folderName">Folder name</label>
+      <input type="text" class="fi" id="folderName" placeholder="e.g. Web Security, AD Attacks" enterkeyhint="done">
+    </div>
+    <div class="fg">
+      <label class="fl">Folder image <small>(optional)</small></label>
+      <div class="thumbs" id="folderImgRow"></div>
+      <input type="file" id="folderImgInput" accept="image/*" hidden onchange="onFolderImg(event)">
+    </div>
+    <div id="folderDelWrap" hidden><button class="btn btn-d" onclick="deleteFolder()">&#128465; Delete folder</button></div>
+  </div>
+</div>
+
+<!-- Topic sheet -->
+<div class="overlay" id="topicOv" onclick="cancelTopic()"></div>
+<div class="sheet" id="topicSh" role="dialog" aria-modal="true">
+  <div class="sheet-head">
+    <button class="lnk cancel" onclick="cancelTopic()">Cancel</button>
+    <h2 id="topicShTitle">New topic</h2>
+    <button class="lnk save" onclick="saveTopic()">Save</button>
+  </div>
+  <div class="sheet-body">
+    <div class="fg">
+      <label class="fl" for="topicName">Topic name</label>
+      <input type="text" class="fi" id="topicName" placeholder="e.g. DOM XSS, Kerberoasting">
+    </div>
+    <div class="fg">
+      <label class="fl" for="topicFolder">Folder</label>
+      <select class="fi" id="topicFolder"></select>
+    </div>
+    <div class="fg">
+      <label class="fl">Status</label>
+      <div class="pills" id="statusPills"></div>
+    </div>
+    <div class="fg">
+      <label class="fl" for="topicNotes">Notes <small>(optional)</small></label>
+      <textarea class="fi" id="topicNotes" placeholder="What you want to remember..."></textarea>
+    </div>
+    <div class="fg">
+      <label class="fl" for="topicCode">Code <small>(optional)</small></label>
+      <textarea class="fi code" id="topicCode" placeholder="commands, payloads..." autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+    </div>
+    <div class="fg">
+      <label class="fl">Images <small>(you can pick several at once)</small></label>
+      <div class="thumbs" id="topicImgRow"></div>
+      <input type="file" id="topicImgInput" accept="image/*" multiple hidden onchange="onTopicImg(event)">
+    </div>
+    <div id="topicDelWrap" hidden><button class="btn btn-d" onclick="deleteTopic()">&#128465; Delete topic</button></div>
+  </div>
+</div>
+
+<div class="viewer" id="viewer" hidden onclick="closeViewer()">
+  <button class="x" aria-label="Close">&#10005;</button>
+  <img id="viewerImg" alt="">
+</div>
+<div class="dialog" id="dialog" hidden>
+  <div class="dialog-box">
+    <p id="dialogMsg"></p>
+    <div class="row">
+      <button class="btn btn-d" id="dialogOk">Delete</button>
+      <button class="btn btn-s" id="dialogCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+'use strict';
+// ═══ Storage: IndexedDB. Data record + one record per image (Blob). ═══
+const DB_NAME='cyberstudy', DATA_KEY='data';
+let dbp=null;
+function db(){
+  if(!dbp) dbp=new Promise((res,rej)=>{
+    const r=indexedDB.open(DB_NAME,1);
+    r.onupgradeneeded=()=>{const d=r.result;d.createObjectStore('kv');d.createObjectStore('imgs')};
+    r.onsuccess=()=>res(r.result);
+    r.onerror=()=>rej(r.error);
+  });
+  return dbp;
+}
+async function idb(store,mode,fn){
+  const d=await db();
+  return new Promise((res,rej)=>{
+    const tx=d.transaction(store,mode);const s=tx.objectStore(store);
+    let out;const req=fn(s);if(req)req.onsuccess=()=>{out=req.result};
+    tx.oncomplete=()=>res(out);tx.onerror=()=>rej(tx.error);tx.onabort=()=>rej(tx.error||new Error('abort'));
+  });
+}
+const kvGet=k=>idb('kv','readonly',s=>s.get(k));
+const kvPut=(k,v)=>idb('kv','readwrite',s=>s.put(v,k));
+const imgGet=id=>idb('imgs','readonly',s=>s.get(id));
+const imgPut=(id,blob)=>idb('imgs','readwrite',s=>s.put(blob,id));
+const imgDel=ids=>ids.length?idb('imgs','readwrite',s=>{ids.forEach(i=>s.delete(i))}):Promise.resolve();
+
+let D={folders:[],topics:[]};
+async function save(){
+  try{await kvPut(DATA_KEY,D);return true}
+  catch(e){toast('Save failed. Your phone storage may be full.',true);return false}
+}
+
+// Image URLs for display (object URLs, created once per image)
+const urlCache=new Map();
+async function imgURL(id){
+  if(urlCache.has(id))return urlCache.get(id);
+  const b=await imgGet(id);if(!b)return '';
+  const u=URL.createObjectURL(b);urlCache.set(id,u);return u;
+}
+function hydrate(root){
+  root.querySelectorAll('img[data-img]').forEach(async el=>{el.src=await imgURL(el.dataset.img)});
+}
+function forgetURLs(ids){ids.forEach(i=>{const u=urlCache.get(i);if(u){URL.revokeObjectURL(u);urlCache.delete(i)}})}
+
+const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+
+function resizeImg(file,maxW){
+  return new Promise((res,rej)=>{
+    const url=URL.createObjectURL(file);const img=new Image();
+    img.onload=()=>{
+      let w=img.naturalWidth,h=img.naturalHeight;
+      if(w>maxW){h=Math.round(h*maxW/w);w=maxW}
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);URL.revokeObjectURL(url);
+      c.toBlob(b=>b?res(b):rej(new Error('blob')),'image/jpeg',0.82);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('decode'))};
+    img.src=url;
+  });
+}
+
+// ═══ UI helpers ═══
+const $=id=>document.getElementById(id);
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function linkify(s){return esc(s).replace(/https?:\/\/[^\s<]+/g,u=>`<a href="${u}" target="_blank" rel="noopener">${u}</a>`)}
+let toastT;
+function toast(msg,err){const t=$('toast');t.textContent=msg;t.className='toast'+(err?' err':'');t.hidden=false;
+  clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,err?5000:2500)}
+function ask(msg,okLabel){
+  return new Promise(res=>{
+    $('dialogMsg').textContent=msg;$('dialogOk').textContent=okLabel||'Delete';$('dialog').hidden=false;
+    const done=v=>{$('dialog').hidden=true;$('dialogOk').onclick=$('dialogCancel').onclick=null;res(v)};
+    $('dialogOk').onclick=()=>done(true);$('dialogCancel').onclick=()=>done(false);
+  });
+}
+
+const STATUS={inbox:'📥 To learn',learning:'📖 Learning',practice:'🎯 Practice',done:'✅ Done'};
+const badge=s=>STATUS[s]?`<span class="badge b-${s}">${STATUS[s].slice(STATUS[s].indexOf(' ')+1)}</span>`:'';
+const folderById=id=>D.folders.find(f=>f.id===id);
+const topicById=id=>D.topics.find(t=>t.id===id);
+
+// ═══ Navigation ═══
+let view='home', curFolder=null, curTopic=null;
+function show(v){
+  view=v;
+  $('vHome').hidden=v!=='home';$('vFolder').hidden=v!=='folder';$('vTopic').hidden=v!=='topic';
+  $('backBtn').hidden=v==='home';$('searchBtn').hidden=v!=='home';$('editBtn').hidden=v==='home';
+  $('scroll').scrollTop=0;
+}
+function goHome(){curFolder=null;curTopic=null;show('home');renderHome()}
+function goBack(){
+  if(view==='topic'&&curFolder&&folderById(curFolder)){curTopic=null;show('folder');renderFolder()}
+  else goHome();
+}
+function openFolder(id){curFolder=id;show('folder');renderFolder()}
+function openTopic(id,fromFolder){
+  const t=topicById(id);if(!t)return;
+  curTopic=id;if(!fromFolder)curFolder=t.folderId;
+  show('topic');renderTopic();
+}
+function refresh(){
+  if(view==='home')renderHome();
+  else if(view==='folder')folderById(curFolder)?renderFolder():goHome();
+  else topicById(curTopic)?renderTopic():goBack();
+}
+function onEditBtn(){view==='folder'?editFolder(curFolder):editTopic(curTopic)}
+function onFab(){
+  if(!D.folders.length){openFolderSheet();return}
+  openTopicSheet(view==='home'?null:curFolder);
+}
+
+// ═══ Render ═══
+function renderHome(){
+  $('topTitle').innerHTML='Cyber <em>Study</em>';
+  renderBanners();
+  const n=s=>D.topics.filter(t=>t.status===s).length;
+  $('stats').innerHTML=[[D.topics.length,'Topics'],[n('inbox'),'To learn'],[n('done'),'Done']]
+    .map(([v,l])=>`<div class="stat"><div class="stat-n">${v}</div><div class="stat-l">${l}</div></div>`).join('');
+
+  const last=[...D.topics].filter(t=>t.status!=='done').sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];
+  $('continueArea').innerHTML=last?`<div class="sh">PICK UP WHERE YOU LEFT OFF</div>${topicCard(last,true)}`:'';
+
+  const g=$('foldersGrid');
+  g.innerHTML=D.folders.map(f=>{
+    const cnt=D.topics.filter(t=>t.folderId===f.id).length;
+    const img=f.img?`<img class="folder-img" data-img="${f.img}" alt="">`:`<div class="folder-ph">&#128194;</div>`;
+    return `<button class="folder" onclick="openFolder('${f.id}')">${img}
+      <div class="folder-name">${esc(f.name)}</div><div class="folder-count">${cnt} ${cnt===1?'topic':'topics'}</div></button>`;
+  }).join('')+`<button class="folder folder-add" onclick="openFolderSheet()"><div class="plus">+</div><div class="folder-name">New folder</div></button>`;
+  hydrate(g);
+}
+function topicCard(t,showFolder){
+  const f=folderById(t.folderId);
+  const bits=[badge(t.status)];
+  if(showFolder&&f)bits.unshift(`<span>${esc(f.name)}</span>`);
+  if(t.images?.length)bits.push(`<span>&#128247; ${t.images.length}</span>`);
+  if(t.notes)bits.push('<span>&#128221;</span>');
+  if(t.code)bits.push('<span style="font-family:var(--mono)">&lt;/&gt;</span>');
+  return `<button class="card" onclick="openTopic('${t.id}',${view==='folder'})"><div class="card-title">${esc(t.name)}</div><div class="card-meta">${bits.join('')}</div></button>`;
+}
+function renderFolder(){
+  const f=folderById(curFolder);if(!f)return goHome();
+  $('topTitle').textContent=f.name;
+  const order={learning:0,practice:1,inbox:2,done:3};
+  const topics=D.topics.filter(t=>t.folderId===f.id)
+    .sort((a,b)=>(order[a.status]-order[b.status])||((b.updatedAt||0)-(a.updatedAt||0)));
+  $('vFolder').innerHTML=topics.length?topics.map(t=>topicCard(t,false)).join('')
+    :`<div class="empty"><div class="ei">&#128221;</div><p>No topics in this folder yet.<br>Tap + to add one.</p></div>`;
+}
+function renderTopic(){
+  const t=topicById(curTopic);if(!t)return goBack();
+  const f=folderById(t.folderId);
+  $('topTitle').textContent=f?f.name:'';
+  let h=`<div class="topic-h"><h2>${esc(t.name)}</h2></div>
+    <div class="pills" style="margin:12px 0 4px">${Object.keys(STATUS).map(s=>
+      `<button class="pill ${t.status===s?'on':''}" onclick="quickStatus('${s}')">${STATUS[s]}</button>`).join('')}</div>`;
+  if(t.notes)h+=`<div class="sh">NOTES</div><div class="note-text">${linkify(t.notes)}</div>`;
+  if(t.code)h+=`<div class="sh">CODE</div><div class="code-wrap"><button class="copy" onclick="copyCode()">Copy</button><pre class="code-box"><code>${esc(t.code)}</code></pre></div>`;
+  if(t.images?.length)h+=`<div class="sh">IMAGES</div><div class="gallery">${t.images.map(id=>
+    `<button onclick="viewImg('${id}')"><img data-img="${id}" alt=""></button>`).join('')}</div>`;
+  if(!t.notes&&!t.code&&!t.images?.length)
+    h+=`<div class="empty"><div class="ei">&#9999;&#65039;</div><p>Nothing here yet.<br>Tap &#9998; at the top to add notes, code and images.</p></div>`;
+  $('vTopic').innerHTML=h;hydrate($('vTopic'));
+}
+async function quickStatus(s){const t=topicById(curTopic);if(!t)return;t.status=s;t.updatedAt=Date.now();await save();renderTopic()}
+async function copyCode(){
+  const t=topicById(curTopic);if(!t)return;
+  try{await navigator.clipboard.writeText(t.code);toast('Code copied')}catch(e){toast('Could not copy',true)}
+}
+async function viewImg(id){$('viewerImg').src=await imgURL(id);$('viewer').hidden=false}
+function closeViewer(){$('viewer').hidden=true}
+
+// Banner: install instructions (shown in Safari only)
+function isStandalone(){return navigator.standalone===true||matchMedia('(display-mode: standalone)').matches}
+function pref(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+function renderBanners(){
+  let h='';
+  if(!isStandalone()&&pref('cs_hide_install')!=='1'){
+    h+=`<div class="note"><button class="dismiss" onclick="pref('cs_hide_install','1');renderBanners()" aria-label="Close">&#10005;</button>
+      <h3>&#128241; Install on your iPhone</h3>
+      <ol><li>Make sure this page is open in <b>Safari</b></li>
+      <li>Tap the Share button (square with an up arrow)</li>
+      <li>Choose <b>Add to Home Screen</b>, then <b>Add</b></li>
+      <li>Open the app from the Home Screen icon. From then on it works offline too.</li></ol>
+      <p style="margin-top:8px;font-size:13px">Note: anything saved here in the browser won't carry over to the installed app. Start using it from the icon.</p></div>`;
+  }
+  $('banners').innerHTML=h;
+}
+// ═══ Search ═══
+function toggleSearch(){
+  const open=$('searchArea').hidden;
+  $('searchArea').hidden=!open;$('homeMain').hidden=open;
+  if(open)$('searchInput').focus();else{$('searchInput').value='';$('searchResults').innerHTML=''}
+}
+function doSearch(){
+  const q=$('searchInput').value.trim().toLowerCase(),r=$('searchResults');
+  if(!q){r.innerHTML='';return}
+  const has=s=>(s||'').toLowerCase().includes(q);
+  const fs=D.folders.filter(f=>has(f.name));
+  const ts=D.topics.filter(t=>has(t.name)||has(t.notes)||has(t.code));
+  if(!fs.length&&!ts.length){r.innerHTML='<div class="empty"><p>No results</p></div>';return}
+  r.innerHTML=(fs.length?'<div class="sh">FOLDERS</div>'+fs.map(f=>`<button class="card" onclick="toggleSearch();openFolder('${f.id}')"><div class="card-title">&#128194; ${esc(f.name)}</div></button>`).join(''):'')
+    +(ts.length?'<div class="sh">TOPICS</div>'+ts.map(t=>topicCard(t,true)).join(''):'');
+}
+
+// ═══ Sheets ═══
+function openSheet(n){$(n+'Ov').classList.add('open');$(n+'Sh').classList.add('open')}
+function closeSheet(n){$(n+'Ov').classList.remove('open');$(n+'Sh').classList.remove('open');document.activeElement?.blur?.()}
+function thumbs(rowId,ids,rmFn,addFn){
+  $(rowId).innerHTML=ids.map((id,i)=>`<div class="thumb"><img data-img="${id}" alt=""><button class="rm" onclick="${rmFn}(${i})" aria-label="Remove">&#10005;</button></div>`).join('')
+    +`<button class="add-img" onclick="${addFn}" aria-label="Add image">&#128247;</button>`;
+  hydrate($(rowId));
+}
+
+// Folder sheet. Picked images are stored right away; cancel removes new ones, save removes dropped ones.
+let fEdit=null,fImg=null,fOrig=null;
+function openFolderSheet(){
+  fEdit=null;fImg=null;fOrig=null;
+  $('folderShTitle').textContent='New folder';$('folderName').value='';$('folderDelWrap').hidden=true;
+  renderFolderImg();openSheet('folder');setTimeout(()=>$('folderName').focus(),300);
+}
+function editFolder(id){
+  const f=folderById(id);if(!f)return;
+  fEdit=id;fImg=f.img||null;fOrig=fImg;
+  $('folderShTitle').textContent='Edit folder';$('folderName').value=f.name;$('folderDelWrap').hidden=false;
+  renderFolderImg();openSheet('folder');
+}
+function renderFolderImg(){thumbs('folderImgRow',fImg?[fImg]:[],'rmFolderImg',"$('folderImgInput').click()")}
+async function rmFolderImg(){if(fImg&&fImg!==fOrig)await imgDel([fImg]);fImg=null;renderFolderImg()}
+async function onFolderImg(e){
+  const file=e.target.files[0];e.target.value='';if(!file)return;
+  try{const b=await resizeImg(file,600);const id=uid('i');await imgPut(id,b);
+    if(fImg&&fImg!==fOrig)await imgDel([fImg]);fImg=id;renderFolderImg()}
+  catch(err){toast('Could not save the image',true)}
+}
+async function cancelFolder(){if(fImg&&fImg!==fOrig){await imgDel([fImg]);forgetURLs([fImg])}fImg=fOrig;closeSheet('folder')}
+async function saveFolder(){
+  const name=$('folderName').value.trim();if(!name){$('folderName').focus();return}
+  if(fEdit){const f=folderById(fEdit);f.name=name;f.img=fImg}
+  else D.folders.push({id:uid('f'),name,img:fImg});
+  const dropped=fOrig&&fOrig!==fImg?[fOrig]:[];
+  if(await save()){await imgDel(dropped);forgetURLs(dropped)}
+  fOrig=fImg;closeSheet('folder');refresh();
+}
+async function deleteFolder(){
+  const f=folderById(fEdit);if(!f)return;
+  const ts=D.topics.filter(t=>t.folderId===f.id);
+  if(!await ask(`Delete the folder "${f.name}"${ts.length?` and its ${ts.length} ${ts.length===1?'topic':'topics'}`:''}?\nThis can't be undone.`))return;
+  const ids=[f.img,fImg,...ts.flatMap(t=>t.images||[])].filter(Boolean);
+  D.topics=D.topics.filter(t=>t.folderId!==f.id);D.folders=D.folders.filter(x=>x.id!==f.id);
+  if(await save()){await imgDel(ids);forgetURLs(ids)}
+  fOrig=fImg=null;closeSheet('folder');goHome();toast('Folder deleted');
+}
+
+// Topic sheet
+let tEdit=null,tStatus='inbox',tImgs=[],tOrig=[];
+function renderPills(){$('statusPills').innerHTML=Object.keys(STATUS).map(s=>`<button class="pill ${s===tStatus?'on':''}" onclick="tStatus='${s}';renderPills()">${STATUS[s]}</button>`).join('')}
+function fillFolderSel(sel){$('topicFolder').innerHTML=D.folders.map(f=>`<option value="${f.id}" ${f.id===sel?'selected':''}>${esc(f.name)}</option>`).join('')}
+function openTopicSheet(folderId){
+  tEdit=null;tStatus='inbox';tImgs=[];tOrig=[];
+  $('topicShTitle').textContent='New topic';
+  ['topicName','topicNotes','topicCode'].forEach(i=>$(i).value='');
+  $('topicDelWrap').hidden=true;fillFolderSel(folderId);renderPills();renderTopicImgs();
+  openSheet('topic');setTimeout(()=>$('topicName').focus(),300);
+}
+function editTopic(id){
+  const t=topicById(id);if(!t)return;
+  tEdit=id;tStatus=t.status||'inbox';tImgs=[...(t.images||[])];tOrig=[...tImgs];
+  $('topicShTitle').textContent='Edit topic';
+  $('topicName').value=t.name;$('topicNotes').value=t.notes||'';$('topicCode').value=t.code||'';
+  $('topicDelWrap').hidden=false;fillFolderSel(t.folderId);renderPills();renderTopicImgs();openSheet('topic');
+}
+function renderTopicImgs(){thumbs('topicImgRow',tImgs,'rmTopicImg',"$('topicImgInput').click()")}
+async function rmTopicImg(i){const id=tImgs.splice(i,1)[0];if(!tOrig.includes(id)){await imgDel([id]);forgetURLs([id])}renderTopicImgs()}
+async function onTopicImg(e){
+  const files=[...e.target.files];e.target.value='';
+  for(const file of files){
+    try{const b=await resizeImg(file,1400);const id=uid('i');await imgPut(id,b);tImgs.push(id);renderTopicImgs()}
+    catch(err){toast('One image could not be saved',true)}
+  }
+}
+async function cancelTopic(){const added=tImgs.filter(i=>!tOrig.includes(i));await imgDel(added);forgetURLs(added);closeSheet('topic')}
+async function saveTopic(){
+  const name=$('topicName').value.trim();if(!name){$('topicName').focus();return}
+  const folderId=$('topicFolder').value;if(!folderId)return;
+  const fields={name,folderId,status:tStatus,notes:$('topicNotes').value.trim(),code:$('topicCode').value.replace(/\s+$/,''),images:[...tImgs],updatedAt:Date.now()};
+  let id=tEdit;
+  if(tEdit)Object.assign(topicById(tEdit),fields);
+  else{id=uid('t');D.topics.push({id,createdAt:Date.now(),...fields})}
+  const dropped=tOrig.filter(i=>!tImgs.includes(i));
+  if(await save()){await imgDel(dropped);forgetURLs(dropped)}
+  tOrig=[...tImgs];closeSheet('topic');
+  if(!tEdit){toast('Saved')}
+  if(view==='topic'){curTopic=id;renderTopic()}else refresh();
+}
+async function deleteTopic(){
+  const t=topicById(tEdit);if(!t)return;
+  if(!await ask(`Delete the topic "${t.name}"?\nThis can't be undone.`))return;
+  const ids=[...new Set([...(t.images||[]),...tImgs])];
+  D.topics=D.topics.filter(x=>x.id!==t.id);
+  if(await save()){await imgDel(ids);forgetURLs(ids)}
+  tOrig=tImgs=[];closeSheet('topic');
+  if(view==='topic')goBack();else refresh();
+  toast('Topic deleted');
+}
+
+// ═══ Start ═══
+(async function init(){
+  try{
+    const d=await kvGet(DATA_KEY);
+    if(d&&Array.isArray(d.folders))D=d;
+    navigator.storage?.persist?.().catch(()=>{});
+  }catch(e){toast('Could not open storage on this device',true)}
+  renderHome();
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+})();
+</script>
+</body>
+</html>
